@@ -31,6 +31,18 @@ def test_create_user_email_already_exists(client, user):
     assert response.json() == {'detail': 'conta já consta no MADR'}
 
 
+def test_create_user_username_already_exists(client, user):
+    data = {
+        'username': user.username,
+        'email': 'foo@bar.com',
+        'password': user.password,
+    }
+
+    response = client.post('/users/', json=data)
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json() == {'detail': 'conta já consta no MADR'}
+
+
 # def test_read_users(client):
 #     response = client.get('/users/')
 #     assert response.status_code == HTTPStatus.OK

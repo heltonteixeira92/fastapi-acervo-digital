@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy import ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
 table_registry = registry()
 
@@ -20,3 +20,33 @@ class User:
     updated_at: Mapped[datetime] = mapped_column(
         init=False, server_default=func.now(), onupdate=func.now()
     )
+
+
+@table_registry.mapped_as_dataclass
+class Author:
+    """https://docs.sqlalchemy.org/en/20/orm/basic_relationships.html"""
+
+    __tablename__ = 'authors'
+
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    name: Mapped[str] = mapped_column(unique=True)
+    created_at: Mapped[datetime] = mapped_column(
+        init=False, server_default=func.now()
+    )
+    books: Mapped[list['Book']] = relationship(
+        init=False, back_populates='author', cascade='all, delete-orphan'
+    )
+
+
+@table_registry.mapped_as_dataclass
+class Book:
+    __tablename__ = 'books'
+
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    year: Mapped[int]
+    title: Mapped[str] = mapped_column(unique=True)
+    created_at: Mapped[datetime] = mapped_column(
+        init=False, server_default=func.now()
+    )
+    author_id: Mapped[int] = mapped_column(ForeignKey('authors.id'))
+    author: Mapped[Author] = relationship(init=False, back_populates='books')

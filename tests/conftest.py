@@ -1,14 +1,13 @@
-# import factory
 import factory.fuzzy
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from sqlalchemy.pool import StaticPool
+from testcontainers.postgres import PostgresContainer
 
 from madr.app import app
 from madr.database import get_session
-from madr.models import User, table_registry
+from madr.models import Author, Book, User, table_registry
 from madr.security import get_password_hash
 
 
@@ -19,6 +18,22 @@ class UserFactory(factory.Factory):
     username = factory.Sequence(lambda n: f'test{n}')
     email = factory.LazyAttribute(lambda obj: f'{obj.username}@test.com')
     password = factory.LazyAttribute(lambda obj: f'{obj.username}@mudar')
+
+
+class AuthorFactory(factory.Factory):
+    class Meta:
+        model = Author
+
+    name = factory.Sequence(lambda n: f'test{n}')
+
+
+class BookFactory(factory.Factory):
+    class Meta:
+        model = Book
+
+    title = factory.Sequence(lambda n: f'contos test{n}')
+    year = factory.Sequence(lambda n: n)
+    author_id = factory.SubFactory(AuthorFactory)
 
 
 @pytest.fixture
@@ -33,13 +48,17 @@ def client(session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope='session')
+def engine():
+    with PostgresContainer('postgres:16', driver='psycopg') as postgres:
+        _engine = create_engine(postgres.get_connection_url())
+
+        with _engine.begin():
+            yield _engine
+
+
 @pytest.fixture
-def session():
-    engine = create_engine(
-        'sqlite:///:memory:',
-        connect_args={'check_same_thread': False},
-        poolclass=StaticPool,
-    )
+def session(engine):
     table_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
@@ -53,6 +72,8 @@ def user(session):
     pwd = 'testtest'
 
     user = UserFactory(
+        username='Pedro',
+        email='Pedro@foo.com',
         password=get_password_hash(pwd),
     )
 
@@ -80,6 +101,28 @@ def other_user(session):
     user.clean_password = pwd  # Monkey Patch // alter. um obj em tempo de exe
 
     return user
+
+
+@pytest.fixture
+def author(session):
+    author = AuthorFactory()
+
+    session.add(author)
+    session.commit()
+    session.refresh(author)
+
+    return author
+
+
+@pytest.fixture
+def book(session):
+    book = BookFactory()
+
+    session.add(book)
+    session.commit()
+    session.refresh(book)
+
+    return book
 
 
 @pytest.fixture
