@@ -1,4 +1,5 @@
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, BeforeValidator, validator
+import re
 
 
 class UserSchema(BaseModel):
@@ -25,6 +26,17 @@ class Token(BaseModel):
 
 class AuthorSchema(BaseModel):
     name: str
+
+    @validator('name')
+    def sanitize_string(cls, v):
+        # Remove todos os espaços em branco do início e do final
+        v = v.strip()
+        # Remove interrogação e exclamação
+        v = re.sub(r'[?!]', '', v)
+        # Substitui todas as ocorrências de um ou mais espaços por um único espaço
+        v = re.sub(r'\s+', ' ', v)
+
+        return v.lower()
 
 
 class AuthorPublic(BaseModel):

@@ -4,4 +4,4 @@
 poetry run alembic upgrade head
 
 # Inicia a aplicação
-poetry run fastapi run fast_zero/app.py --host 0.0.0.0
+poetry run fastapi run madr/app.py --host 0.0.0.0
