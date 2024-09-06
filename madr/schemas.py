@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, BeforeValidator, validator
 import re
+
+from pydantic import BaseModel, ConfigDict, EmailStr, validator
 
 
 class UserSchema(BaseModel):
@@ -33,7 +34,8 @@ class AuthorSchema(BaseModel):
         v = v.strip()
         # Remove interrogação e exclamação
         v = re.sub(r'[?!]', '', v)
-        # Substitui todas as ocorrências de um ou mais espaços por um único espaço
+        # Substitui todas as ocorrências de um ou
+        # mais espaços por um único espaço
         v = re.sub(r'\s+', ' ', v)
 
         return v.lower()
