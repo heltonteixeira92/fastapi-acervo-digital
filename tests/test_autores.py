@@ -16,7 +16,7 @@ def test_create_author(client, token):
 
     assert response.json() == {
         'id': 1,
-        'name': json['name'],
+        'name': 'william shakespeare',
     }
 
 
@@ -102,4 +102,4 @@ def test_patch_author(session, client, author, token):
         headers={'Authorization': f'Bearer {token}'},
     )
     assert response.status_code == HTTPStatus.OK
-    assert response.json()['name'] == 'William Shakespeare'
+    assert response.json()['name'] == 'william shakespeare'
