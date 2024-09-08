@@ -1,6 +1,7 @@
 # fastapi-acervo-digital
 Meu Acervo Digital de Romances - Fast Api do Zero (TCC)
 
+![coverage badge](coverage.svg)
 
 
 ### Configurando o ambiente

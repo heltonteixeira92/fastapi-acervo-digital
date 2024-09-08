@@ -28,3 +28,6 @@ jobs:
 
       - name: Executar testes
         run: poetry run task test
+
+      - name: Gera novo badge de cobertura de teste
+        run: poetry run coverage-badge -f -o coverage.svg
